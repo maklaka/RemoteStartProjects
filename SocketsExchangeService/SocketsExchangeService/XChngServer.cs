@@ -12,44 +12,63 @@ using System.ComponentModel;
 using System.Timers;
 using System.Runtime.Remoting.Messaging;
 
-namespace SocketsExchangeService
+namespace SocketsExchangeService 
 {
 
     public delegate void LogMsg(String msg);
-    class XChngServer
+    public delegate void SockMsg(RemConCliListener rem, String msg);
+
+    public class XChngServer 
     {
-        List<RemoteControlClient> RemCliConns;
-        RemoteControlClient RPIClient;
+        List<RemConCliListener> RemCliConns;
+        //public RemConCliListener RPIClient;
         frmServiceLog parentForm;
-        private  static ISynchronizeInvoke _synch;
+        
 
 
-        public delegate void SockMsg(RemoteControlClient rem, String msg);
+        
         //public delegate void LogMsg(String msg);
 
-        public SockMsg MsgFromClient;
-        public  LogMsg TakeThisLogMsg;
+        private ISynchronizeInvoke Sync;
+        private SockMsg MsgFromClient;
+        private LogMsg TakeThisLogMsg;
+        
 
-
-
-
-        public XChngServer(frmServiceLog par)
+        public XChngServer(frmServiceLog par, ISynchronizeInvoke s)
         {
-            
             parentForm = par;
-            RemCliConns = new List<RemoteControlClient>();
-            RemCliConns.Add(new RemoteControlClient(this));  //start with one control client listener in a background thread
-            RPIClient = new RemoteControlClient(this, "10.0.0.8", 1999);
-           
+            Sync = s;
+            //MsgFromClient = sock;
+            //TakeThisLogMsg = log;
+
+            RemCliConns = new List<RemConCliListener>();
+            //RemCliConns.Add(new RemConCliListener("127.0.0.1", 10000, MsgFromClient, TakeThisLogMsg, (ISynchronizeInvoke)this));  //start with one control client listener in a background thread
+
             TakeThisLogMsg = new LogMsg(OnLogMsg);
             MsgFromClient = new SockMsg(OnMsgFromClient);
+
+            GlobSyn.gTakeThisLogMsg = TakeThisLogMsg;
+            GlobSyn.gMsgFromClient = MsgFromClient;
+
+            try
+            {
+                var temp = new RemConCliListener("10.0.0.8", 10000);
+                RemCliConns.Add(temp);
+            }
+            catch (Exception ex)
+            {
+                while (true) { parentForm = par; }
+            }
+            //RPIClient = new RemConCliListener("10.0.0.8", 1999, MsgFromClient, TakeThisLogMsg, (ISynchronizeInvoke)this);
+           
+            
         }
 
         public void OnLogMsg(String msg)
         {
-            parentForm.txtLog.Invoke((MethodInvoker)(() => parentForm.txtLog.Text += Environment.NewLine + msg));
+            parentForm.txtLog.Invoke((MethodInvoker)(() => parentForm.txtLog.Text = ">> " + DateTime.Now.TimeOfDay + " - " + msg + Environment.NewLine + parentForm.txtLog.Text));
         }
-        public void OnMsgFromClient(RemoteControlClient rem, String msg)
+        public void OnMsgFromClient(RemConCliListener rem, String msg)
         {
             if(msg.Contains("ClientSetup"))
             {

@@ -44,7 +44,7 @@ namespace SocketsExchangeService
     {
         
         Socket listener;
-        Socket handler;
+        public Socket handler;
         public EndPoint remEP;
         string data = null;
 

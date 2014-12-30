@@ -10,8 +10,14 @@ using System.Windows.Forms;
 
 namespace SocketsExchangeService
 {
+
     public partial class frmServiceLog : Form
     {
+
+        
+        //private SockMsg MsgFromClient;
+        //private LogMsg TakeThisLogMsg;
+
         XChngServer xchg;
         //public LogMsg TakeThisLogMsg;
         //public delegate void ChangedEventHandler(string LogMsg);
@@ -72,7 +78,16 @@ namespace SocketsExchangeService
 
         private void frmServiceLog_Load(object sender, EventArgs e)
         {
-            xchg = new XChngServer(this);
+            xchg = new XChngServer(this, (ISynchronizeInvoke)this);
+
+            GlobSyn.gSync = (ISynchronizeInvoke)this;
+            
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            ControlClientCache.AddMessage(Environment.NewLine + txtMsg.Text);
         }
         
     }
