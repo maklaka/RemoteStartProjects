@@ -13,15 +13,17 @@ namespace SocketsExchangeService
         string _msg;
         int NumClientsAtCreation;
         List<uint> ThreadNums;
+        ClientType targetClientType;
 
         System.Timers.Timer t;
         bool expired = false;
 
-        public CacheMessage(string msg, int num)  //only created by main thread for the RPI, timeouts occur on main thread??
+        public CacheMessage(string msg, int num, ClientType ct)  //only created by main thread for the RPI, timeouts occur on main thread??
         {
             ThreadNums = new List<uint>();
             _msg = msg;
             NumClientsAtCreation = num;
+            targetClientType = ct;
 
             t = new System.Timers.Timer();
             t.Elapsed += new ElapsedEventHandler(IAmOld);
@@ -44,9 +46,11 @@ namespace SocketsExchangeService
             t = null;
         }
 
+        
         public bool Expired{get{return expired;}}
         public string MessageString{get{ return _msg;}}
         public bool IsMsgConsumed{ get { return (ThreadNums.Count >= NumClientsAtCreation); } }
+        public ClientType TargetClientType { get { return targetClientType; } }
 
         public bool ConsumeThisMsg(uint ClientID)
         {
@@ -58,31 +62,37 @@ namespace SocketsExchangeService
             return false;    
         }
 
-        //    ~CacheMessage() //gc will take care of items
-        //{
-        //    ThreadNums = null;
-        //    _msg = null;
-        //}
-
     }
 
-    static class ControlClientCache //managed by XChngServer, read/consumed by RemoteControlClients
+    static class ClientMsgCache //Produced at RPI via xchgserver, read/consumed by RemoteControlClients
     {
         private static ReaderWriterLockSlim cacheLock = new ReaderWriterLockSlim();
         private static List<CacheMessage> MessagesToClients = new List<CacheMessage>();
-        //private Dictionary<int, string> innerCache = new Dictionary<int, string>();
         private static int numControlClients = 0;
+        private static int numRPIClients = 0;
         private static uint lastClientID = 0;
 
+        public static void ClientAdded(ClientType ct)
+        {
+            cacheLock.EnterWriteLock();
+            if (ct == ClientType.ConsumerClient)
+                numControlClients++;
+            else if (ct == ClientType.RPIProducerClient)
+                numRPIClients++;
+            cacheLock.ExitWriteLock();
+        }
+        public static void ClientRemoved(ClientType ct)
+        {
+            cacheLock.EnterWriteLock();
+            if (ct == ClientType.ConsumerClient)
+                numControlClients--;
+            else if (ct == ClientType.RPIProducerClient)
+                numRPIClients--;
+            cacheLock.ExitWriteLock();
+        }
         public static int NumTotalClients
         {
             get { return numControlClients; }
-            set 
-            {
-                cacheLock.EnterWriteLock();
-                numControlClients = value; 
-                cacheLock.ExitWriteLock();
-            }
         }
 
         public static uint GenerateClientID()
@@ -93,25 +103,26 @@ namespace SocketsExchangeService
             return lastClientID;   
         }
 
-        public static string Read(uint CID)
+        public static string Read(uint CID, ClientType ct)   //CID 0 is reserved for RPI
         {
             cacheLock.EnterWriteLock(); //thread will block here if there is already a thread in write mode below
             try
             {
                 foreach (CacheMessage cmsg in MessagesToClients.ToList())
                 {
-                    if (cmsg.ConsumeThisMsg(CID))  //returns true if just consumed by thread
-                        return cmsg.MessageString;
-                    
-                    if(cmsg.IsMsgConsumed)         //check here to see if everybody ate this message already
+                    if (cmsg.TargetClientType == ct)
                     {
-                        cmsg.DestroyTimeout();
-                        MessagesToClients.Remove(cmsg);
+                        if (cmsg.ConsumeThisMsg(CID))  //returns true if just consumed by thread
+                            return cmsg.MessageString;
+
+                        if (cmsg.IsMsgConsumed)         //check here to see if everybody ate this message already
+                        {
+                            cmsg.DestroyTimeout();
+                            MessagesToClients.Remove(cmsg);
+                        }
                     }
-
                 }
-
-                
+ 
                 return null; //thread already consumed all existing messages
             }
             finally
@@ -120,12 +131,14 @@ namespace SocketsExchangeService
             }
         }
 
-        public static void AddMessage(string cmsg)
+        public static void AddMessage(string cmsg, ClientType ct)
         {
             cacheLock.EnterWriteLock(); //thread will block here if there is already a thread in write mode below
             try
-            {
-                MessagesToClients.Add(new CacheMessage(cmsg, numControlClients));
+            {   if(numControlClients > 0)
+                    MessagesToClients.Add(new CacheMessage(cmsg, numControlClients, ct));
+                else
+                    GlobSyn.Log("WARNING Ain't got no clients to talk to.. Why u talkin? " + Environment.NewLine + "~~Contents:" + cmsg);   
             }
             finally
             {

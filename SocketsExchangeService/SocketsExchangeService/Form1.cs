@@ -78,16 +78,13 @@ namespace SocketsExchangeService
 
         private void frmServiceLog_Load(object sender, EventArgs e)
         {
-            xchg = new XChngServer(this, (ISynchronizeInvoke)this);
-
+            xchg = new XChngServer(this);
             GlobSyn.gSync = (ISynchronizeInvoke)this;
-            
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-
-            ControlClientCache.AddMessage(Environment.NewLine + txtMsg.Text);
+            ClientMsgCache.AddMessage(Environment.NewLine + txtMsg.Text, ClientType.ConsumerClient);
         }
         
     }

@@ -13,15 +13,15 @@ namespace SocketsExchangeService
         public static SockMsg gMsgFromClient;
         public static LogMsg gTakeThisLogMsg;
 
-
         public static void Log(string s)
         {
             GlobSyn.gSync.Invoke(GlobSyn.gTakeThisLogMsg, new object[1] { s });
         }
 
-        public static void MsgFromClient(RemConCliListener cl, string s)  //add type  (rpi and control client?)
+        public static void MsgFromClient(ClientListener cl, string s)  //add type  (rpi and control client?)
         {
             GlobSyn.gSync.Invoke(gMsgFromClient, new object[2] { cl, s });
         }
+
     }
 }

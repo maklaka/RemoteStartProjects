@@ -66,8 +66,7 @@ namespace SocketsExchangeService
         {
              handler = listener.Accept();
              remEP = handler.RemoteEndPoint;
-             // delete listener here?
-             //handler.Blocking = false;  thought this would have to be enabled? hrmm ???
+
         }
         public string ReceiveWholeMsg()
         {

@@ -16,33 +16,23 @@ namespace SocketsExchangeService
 {
 
     public delegate void LogMsg(String msg);
-    public delegate void SockMsg(RemConCliListener rem, String msg);
+    public delegate void SockMsg(ClientListener rem, String msg);
 
     public class XChngServer 
     {
-        List<RemConCliListener> RemCliConns;
+        List<ClientListener> RemCliConns;
         //public RemConCliListener RPIClient;
         frmServiceLog parentForm;
         
-
-
-        
-        //public delegate void LogMsg(String msg);
-
-        private ISynchronizeInvoke Sync;
         private SockMsg MsgFromClient;
         private LogMsg TakeThisLogMsg;
         
 
-        public XChngServer(frmServiceLog par, ISynchronizeInvoke s)
+        public XChngServer(frmServiceLog par)
         {
             parentForm = par;
-            Sync = s;
-            //MsgFromClient = sock;
-            //TakeThisLogMsg = log;
 
-            RemCliConns = new List<RemConCliListener>();
-            //RemCliConns.Add(new RemConCliListener("127.0.0.1", 10000, MsgFromClient, TakeThisLogMsg, (ISynchronizeInvoke)this));  //start with one control client listener in a background thread
+            RemCliConns = new List<ClientListener>();
 
             TakeThisLogMsg = new LogMsg(OnLogMsg);
             MsgFromClient = new SockMsg(OnMsgFromClient);
@@ -52,12 +42,12 @@ namespace SocketsExchangeService
 
             try
             {
-                var temp = new RemConCliListener("10.0.0.8", 10000);
+                var temp = new ClientListener("10.0.0.8", 10000, ClientType.ConsumerClient);
                 RemCliConns.Add(temp);
             }
             catch (Exception ex)
             {
-                while (true) { parentForm = par; }
+                GlobSyn.Log("FAILED to create client listener" + Environment.NewLine + "~~See Exception:" + ex.Message);
             }
             //RPIClient = new RemConCliListener("10.0.0.8", 1999, MsgFromClient, TakeThisLogMsg, (ISynchronizeInvoke)this);
            
@@ -68,7 +58,7 @@ namespace SocketsExchangeService
         {
             parentForm.txtLog.Invoke((MethodInvoker)(() => parentForm.txtLog.Text = ">> " + DateTime.Now.TimeOfDay + " - " + msg + Environment.NewLine + parentForm.txtLog.Text));
         }
-        public void OnMsgFromClient(RemConCliListener rem, String msg)
+        public void OnMsgFromClient(ClientListener rem, String msg)
         {
             if(msg.Contains("ClientSetup"))
             {

@@ -39,13 +39,16 @@
             this.tsmShow = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.txtMsg = new System.Windows.Forms.TextBox();
+            this.txtTraffic = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.cmsTrayStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtLog
             // 
             this.txtLog.BackColor = System.Drawing.Color.White;
-            this.txtLog.Location = new System.Drawing.Point(12, 12);
+            this.txtLog.Location = new System.Drawing.Point(12, 34);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
@@ -97,7 +100,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(330, 301);
+            this.button1.Location = new System.Drawing.Point(330, 323);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(193, 23);
             this.button1.TabIndex = 1;
@@ -107,18 +110,52 @@
             // 
             // txtMsg
             // 
-            this.txtMsg.Location = new System.Drawing.Point(12, 303);
+            this.txtMsg.Location = new System.Drawing.Point(12, 325);
             this.txtMsg.Name = "txtMsg";
             this.txtMsg.Size = new System.Drawing.Size(312, 20);
             this.txtMsg.TabIndex = 2;
+            // 
+            // txtTraffic
+            // 
+            this.txtTraffic.BackColor = System.Drawing.Color.White;
+            this.txtTraffic.Location = new System.Drawing.Point(621, 34);
+            this.txtTraffic.Multiline = true;
+            this.txtTraffic.Name = "txtTraffic";
+            this.txtTraffic.ReadOnly = true;
+            this.txtTraffic.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtTraffic.Size = new System.Drawing.Size(581, 280);
+            this.txtTraffic.TabIndex = 3;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(84, 18);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Server Log:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(618, 9);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(118, 18);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Message Traffic:";
             // 
             // frmServiceLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(598, 336);
+            this.ClientSize = new System.Drawing.Size(1210, 360);
             this.ControlBox = false;
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtTraffic);
             this.Controls.Add(this.txtMsg);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.txtLog);
@@ -126,7 +163,7 @@
             this.MaximizeBox = false;
             this.Name = "frmServiceLog";
             this.ShowInTaskbar = false;
-            this.Text = "Socket Xchange Service Log";
+            this.Text = "Socket Xchange Service";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmServiceLog_FormClosing);
             this.Load += new System.EventHandler(this.frmServiceLog_Load);
             this.Resize += new System.EventHandler(this.frmServiceLog_Resize);
@@ -147,6 +184,9 @@
         private System.Windows.Forms.ToolStripMenuItem tsmShow;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox txtMsg;
+        public System.Windows.Forms.TextBox txtTraffic;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 
