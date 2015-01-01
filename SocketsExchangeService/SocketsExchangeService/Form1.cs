@@ -80,12 +80,9 @@ namespace SocketsExchangeService
         {
             xchg = new XChngServer(this);
             GlobSyn.gSync = (ISynchronizeInvoke)this;
-        }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            ClientMsgCache.AddMessage(Environment.NewLine + txtMsg.Text, ClientType.ConsumerClient);
+            lsvRemConClients.Columns[0].Width = this.lsvRemConClients.Width - 20;
+            
         }
-        
     }
 }

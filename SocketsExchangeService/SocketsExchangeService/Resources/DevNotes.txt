@@ -10,9 +10,17 @@ MyIPAlive - every 2mi  (Car on/off status)
 
 ClientSetup IP:10.0.0.8 PORT:2345 <EOF>
 
+
+ACK_Status <EOF>
 ~~~~~connection will be rejected if two are waiting on an initial message already~~~~
 
 
 cory
 965
 2848
+
+implement client heartbeat?
+
+GlobSyn.MsgFromClient(this, retstr);
+
+diposed shit not working >.<

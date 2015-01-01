@@ -56,7 +56,7 @@ namespace SocketsExchangeService
             listener = new Socket(AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(connEndPoint);
             listener.Listen(1);
-
+            
             //WHERE SHOULD I PUT THESE?!
             //handler.Shutdown(SocketShutdown.Both);
             //handler.Close();

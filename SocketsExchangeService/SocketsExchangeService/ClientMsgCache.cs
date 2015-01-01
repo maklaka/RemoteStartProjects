@@ -90,17 +90,20 @@ namespace SocketsExchangeService
                 numRPIClients--;
             cacheLock.ExitWriteLock();
         }
-        public static int NumTotalClients
-        {
-            get { return numControlClients; }
-        }
 
-        public static uint GenerateClientID()
+        public static uint GenerateClientID(ClientType ct)
         {
-            cacheLock.EnterWriteLock(); 
-            lastClientID += 1;
-            cacheLock.ExitWriteLock();
-            return lastClientID;   
+            if (ct == ClientType.RPIProducerClient)  //client ID 0 reserved for RPI
+            {
+                return 0;   
+            }
+            else
+            {
+                cacheLock.EnterWriteLock();
+                lastClientID += 1;
+                cacheLock.ExitWriteLock();
+                return lastClientID;
+            }
         }
 
         public static string Read(uint CID, ClientType ct)   //CID 0 is reserved for RPI
@@ -135,10 +138,14 @@ namespace SocketsExchangeService
         {
             cacheLock.EnterWriteLock(); //thread will block here if there is already a thread in write mode below
             try
-            {   if(numControlClients > 0)
+            {
+                if (ct == ClientType.ConsumerClient && numControlClients > 0)
                     MessagesToClients.Add(new CacheMessage(cmsg, numControlClients, ct));
-                else
-                    GlobSyn.Log("WARNING Ain't got no clients to talk to.. Why u talkin? " + Environment.NewLine + "~~Contents:" + cmsg);   
+                else if (ct == ClientType.RPIProducerClient && numRPIClients > 0)
+                    MessagesToClients.Add(new CacheMessage(cmsg, numRPIClients, ct));
+
+                //else
+                    //GlobSyn.Log("WARNING Ain't got no clients to talk to.. Why u talkin? " + Environment.NewLine + "~~Contents:" + cmsg);   meh...can still ack, no need
             }
             finally
             {

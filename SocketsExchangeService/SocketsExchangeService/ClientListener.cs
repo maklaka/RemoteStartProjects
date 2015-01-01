@@ -24,7 +24,6 @@ namespace SocketsExchangeService
         private ClientType cType;
 
         public int NumClients { get { return clients.Count; } }
-
         RecSock receiver;
         
         string svrIP;
@@ -46,14 +45,6 @@ namespace SocketsExchangeService
             //ServeThread.DoWork += ConnThread_DoWork;
             //ServeThread.WorkerSupportsCancellation = true;
             //ServeThread.RunWorkerAsync();
-        }
-        
-        public void SetupSendToClientSocket(string ip, int port)
-        {
-            //sendy = new SendSock(ip, port);
-
-            //SendToClient("Hello! I configured you as a server and I can bug you with messages now!");
-            //configure to heartbeat every 20 seconds?
         }
 
         void TCP_Listener()
@@ -78,14 +69,13 @@ namespace SocketsExchangeService
                     //_synch.Invoke(parentThread.TakeThisLogMsg, new object[1] { "Initial Message received from client " + receiver.remEP.ToString() });
 
                     GlobSyn.Log("Initial Message received from client " + receiver.remEP.ToString());
-                    GlobSyn.MsgFromClient(this, retstr);
+                    
 
                     try
                     {
                         TCPClientConn temp = new TCPClientConn(receiver.handler, cType);
                         temp.SelfDestruct += new ClientKiller(MuderThatClientAtHisBehest);
-                        clients.Add(temp); //starts a new threaded conversation
-                        
+                        clients.Add(temp); //starts a new threaded conversation                   
                     }
                     catch (Exception exIn)
                     {
@@ -99,14 +89,16 @@ namespace SocketsExchangeService
                 }
             }
         }
+
         private void MuderThatClientAtHisBehest(TCPClientConn conn)
         {
+            //taking the object out of any scope should get her good and garbage collected...eventually >.V  hopefully the thread actually stopped
             clients.Remove(conn);
             conn = null;
         }
     }
 
-    public class TCPClientConn : IDisposable
+    public class TCPClientConn
     {
         private Thread connThread;
         private Socket connection;
@@ -120,19 +112,21 @@ namespace SocketsExchangeService
         private byte[] bytes;
         private uint CID;
         private ClientType cType;
+       
         
-        private bool disposed = false;
+        private bool disposing = false;
 
         public ClientKiller SelfDestruct;
 
         public TCPClientConn(Socket handle, ClientType ct)
         {
             connection = handle;
-            CID = ClientMsgCache.GenerateClientID();
-            connection.ReceiveTimeout = 500;
+            connection.ReceiveTimeout = 500;   //not presently used? maybe?  I'm in "non-blocking" sychronous mode..whatever that means?!!????
             cType = ct;
+            CID = ClientMsgCache.GenerateClientID(cType);
             connThread = new Thread(new ThreadStart(BidiChat));
-            connThread.Start();      
+            connThread.Start();  
+
         }
 
         private void BidiChat()
@@ -141,11 +135,13 @@ namespace SocketsExchangeService
             ISynchronizeInvoke synob = (ISynchronizeInvoke)syn;
 
             ClientMsgCache.ClientAdded(cType);
+            GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ClientSetup <EOF>");
+            //GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ACK_Status <EOF>");
 
             timKeepAlive = new System.Timers.Timer();
             timKeepAlive.SynchronizingObject = synob;
             timKeepAlive.Elapsed += new ElapsedEventHandler(KeepAliveTO);
-            timKeepAlive.Interval = 1000 * 4;  //at 20 seconds, 18 bytes per exchange, should be 2.3MB/month
+            timKeepAlive.Interval = 1000 * 20;  //at 20 seconds, 18 bytes per exchange, should be 2.3MB/month
             timKeepAlive.Start();
 
             timSendChk = new System.Timers.Timer();
@@ -171,11 +167,10 @@ namespace SocketsExchangeService
                     {
                         retstr = ReceiveWholeMsg();
                     } while (retstr == null);
-                    
-                    //
-                    //pass message onto xchang server if not simply and ACK??
-                    //
-                    if (retstr.Contains("ACK <EOF>"))
+
+                    GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, retstr);  
+
+                    if (retstr.Contains("ACK_Status "))
                     {
                         timKeepAlive.Stop();
                         timKeepAlive.Interval = 20000;
@@ -209,7 +204,7 @@ namespace SocketsExchangeService
                         timRecMsgEscape.Start();
                         data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
                     }
-  
+
                     if (data.IndexOf("<EOF>") > -1)
                     {
                         timRecMsgEscape.Stop();
@@ -220,11 +215,15 @@ namespace SocketsExchangeService
             catch (SocketException Ex)
             {
                 if (Ex.ErrorCode == 10060)
+                {
                     GlobSyn.Log("FAILURE! Incomplete message! 500ms TIMEOUT from " + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
+                    bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
+                }
             }
             catch (Exception Ex)
             {
                 GlobSyn.Log("FAILURE! Error while receving message from " + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
+                bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
             }
 
             return null; //no message here *weeps*  WHY WON'T ANYBODY TALK TO ME?!  ACK <EOF>
@@ -235,6 +234,7 @@ namespace SocketsExchangeService
         {
             string msg;
             msg = ClientMsgCache.Read(CID, cType);
+            
             try
             {
                 if (msg != null)
@@ -265,16 +265,23 @@ namespace SocketsExchangeService
                     //kill this whole thang?
                     GlobSyn.Log("FAILURE! Client is dead at " + connection.RemoteEndPoint.ToString() + " he isn't keeping up with ACKs :'(");
                     waitingForAck = false;
-                    ThisConnectionSucks();
+                    bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
                 }
                 else if (!transmittingNow) //only send ackreq if not actively transmitting already
                 {
-                    //bytes = Encoding.ASCII.GetBytes("AM I BEING SENT TO THE FUCKING SAME PC?! aint no localhost socket, son <EOF>");
-                    bytes = Encoding.ASCII.GetBytes("REQ <EOF>");
-                    connection.Send(bytes);
-                    waitingForAck = true;
-                    timKeepAlive.Interval = 1000; //expect reply within 400ms
-                    timKeepAlive.Start();
+                    try
+                    {
+                        //bytes = Encoding.ASCII.GetBytes("AM I BEING SENT TO THE FUCKING SAME PC?! aint no localhost socket, son <EOF>");
+                        bytes = Encoding.ASCII.GetBytes("REQ <EOF>");
+                        connection.Send(bytes);
+                        waitingForAck = true;
+                        timKeepAlive.Interval = 1000 * 5; //expect reply within 400ms
+                        timKeepAlive.Start();
+                    }
+                    catch(Exception Ex) 
+                    {
+                        GlobSyn.Log("FAILURE! I was tryna send an ACK_Status but something got weird with:"  + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
+                    }
                 }
                 else
                 {
@@ -284,55 +291,25 @@ namespace SocketsExchangeService
             
         }
         
-
         private void recMsgTO(object derp, ElapsedEventArgs e)
         {
-            ThisConnectionSucks();
+            bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
         }
         
-        private void ThisConnectionSucks()
+        private byte ThisConnectionSucks()
         {
-            //Dispose();
+            disposing = true;// don't let this thread call this thang more than once!
             ClientMsgCache.ClientRemoved(cType);
-            connThread.Abort();
+            GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ClientKilled <EOF>");
+
             timKeepAlive.Stop();
             timRecMsgEscape.Stop();
             timSendChk.Stop();
+            
+            SelfDestruct(this); //if I abort the thread I am running on...wat..wait BRAIN MELT??!?!? will this be reached? put abort afterwards...lesse
+            connThread.Abort();
 
-            SelfDestruct(this);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            // Check to see if Dispose has already been called. 
-            if (!this.disposed)
-            {
-                // If disposing equals true, dispose all managed 
-                // and unmanaged resources. 
-                if (disposing)
-                {
-                    // Dispose managed resources.
-                    connThread.Abort();
-                    connection.Dispose();
-
-                    timKeepAlive.Stop();
-                    timRecMsgEscape.Stop();
-                    timSendChk.Stop();
-
-                    timSendChk.Dispose();
-                    timKeepAlive.Dispose();
-                    timRecMsgEscape.Dispose();      
-                }
-                // Note disposing has been done.
-                disposed = true;
-
-            }
+            return 1;
         }
     }
 
