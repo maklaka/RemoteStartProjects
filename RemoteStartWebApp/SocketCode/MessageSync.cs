@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 namespace RemoteStartWebApp
 {
     public enum ClientType { ConsumerClient, RPIProducerClient };
-    public delegate void SockMsg(ClientType ctSource, uint CID, EndPoint ipep, string msg);
+    public delegate void SockMsg(EndPoint ipep, string msg);
 
     public static class GlobSyn
     {
         public static ISynchronizeInvoke gSync;
-        public static SockMsg gMsgFromClient;
+        public static SockMsg gMsgFromServer;
 
-        public static void MsgFromClient(ClientType ctSource, uint CID, EndPoint ipep, string msg)  //add type  (rpi and control client?)
+        public static void MsgFromServer(EndPoint ipep, string msg)  //add type  (rpi and control client?)
         {
-            GlobSyn.gSync.Invoke(gMsgFromClient, new object[4] { ctSource, CID, ipep, msg });
+            GlobSyn.gSync.Invoke(gMsgFromServer, new object[2] { ipep, msg });
         }
 
     }

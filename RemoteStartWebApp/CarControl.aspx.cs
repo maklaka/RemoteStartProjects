@@ -7,51 +7,115 @@ using System.Web.UI.WebControls;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Threading;
+using System.Drawing;
+
 
 namespace RemoteStartWebApp
 {
-    public partial class WebForm1 : System.Web.UI.Page
+
+    public partial class CarControl : System.Web.UI.Page
     {
-        private SockMsg MsgFromServer;
-        Socket sendy;
-        byte[] bytes = new byte[1024];
-        string data;
-        bool woo;
+        public void Page_PreInit(object sender, EventArgs e)
+        {
+            if(!IsPostBack)
+            {
+                SessionManager.AddSession(Session.SessionID);
+                //timUpdateMe.Interval = 1000;
+                //timReadFromSrvr = new System.Timers.Timer();
+                //timReadFromSrvr.Interval = 100;
+
+                //timReadFromSrvr.Elapsed += timReadFromSrvr_Elapsed;
+                //conn.SelfDestruct += new ClientKiller(MuderThatClientAtHisBehest);
+
+                //timReadFromSrvr.Start();
+
+            }
+
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["New"] != null)
             {
-                //lblWelcome.Text = "Welcome, friend!";
-                //create a socket client to talk to sockets service
 
-
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10001);
-
-                // Create a TCP/IP  socket.
-                sendy = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                sendy.Connect(remoteEP);
-                byte[] msg = Encoding.ASCII.GetBytes("This is my connection message <EOF>");
-
-                // Send the data through the socket.
-                int bytesSent = sendy.Send(msg);
-
-                // Receive the response from the remote device.
-                int bytesRec = sendy.Receive(bytes);
-                Console.WriteLine("Echoed test = {0}",
-                    Encoding.ASCII.GetString(bytes, 0, bytesRec));
-
-                data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                woo = true;
 
             }
             else
                 Response.Redirect("Default.aspx");
 
+        }    
 
+        private void MuderThatClientAtHisBehest(TCPClientConn conn)
+        {
+            //taking the object out of any scope should get her good and garbage collected...eventually >.V  hopefully the thread actually stopped
 
+            conn = null;
+        }
+
+        //protected void timUpdateMe_Tick(object sender, EventArgs e)
+        //{
+        //    string msg;
+        //    msg = ClientMsgCache.ReadMsgForPage();
+        //    if (msg != null)
+        //    {
+        //        if (msg.Contains("ACK_Status"))
+        //        {
+        //            string ipep = msg.Substring(msg.IndexOf("RPIClientEndPoint:")).Split(' ')[0].Replace("RPIClientEndPoint:", "");
+        //            string carstat = msg.Substring(msg.IndexOf("CarState:")).Split(' ')[0].Replace("CarState:", "");;
+        //            string rpistat = msg.Substring(msg.IndexOf("RPIState:")).Split(' ')[0].Replace("RPIState:", "");
+        //            string rpitime = msg.Substring(msg.IndexOf("InfoTime:")).Split(' ')[0].Replace("InfoTime:", "");
+
+        //            IPEndPoint.Text = ipep;
+        //            lblCarStatus.Text = carstat == "ON" ? "Car is on!" : "Car is off";
+        //            lblSrvrStatus.Text = rpistat == "UP" ? "Rpi is up and running!" : "Rpi is down :\\";
+        //            LastRPIInfo.Text = rpitime;
+
+        //            lblCarStatus.BackColor = carstat == "ON" ? Color.LightGreen : Color.Red;
+        //            lblSrvrStatus.BackColor = rpistat == "UP" ? Color.LightGreen : Color.Red;
+        //        }
+
+        //        //respond with acknowledgement no matter what
+        //        ClientMsgCache.AddMessageToServer("ACK_Status <EOF>");
+        //    }
+        //}
+
+        protected void btnStartTheCard_Click(object sender, EventArgs e)
+        {
+            ClientMsgCache.AddMessageToServer("StartCar <EOF>");
+        }
+
+        protected void timUpdateMe_Tick(object sender, EventArgs e)
+        {
+            string msg;
+            msg = ClientMsgCache.ReadMsgForPage();
+            if (msg != null)
+            {
+                if (msg.Contains("ACK_Status"))
+                {
+                    string ipep = msg.Substring(msg.IndexOf("RPIClientEndPoint:")).Split(' ')[0].Replace("RPIClientEndPoint:", "");
+                    string carstat = msg.Substring(msg.IndexOf("CarState:")).Split(' ')[0].Replace("CarState:", ""); ;
+                    string rpistat = msg.Substring(msg.IndexOf("RPIState:")).Split(' ')[0].Replace("RPIState:", "");
+                    string rpitime = msg.Substring(msg.IndexOf("InfoTime:")).Split(' ')[0].Replace("InfoTime:", "");
+
+                    IPEndPoint.Text = ipep;
+                    lblCarStatus.Text = carstat == "ON" ? "Car is on!" : "Car is off";
+                    lblSrvrStatus.Text = rpistat == "UP" ? "Rpi is up and running!" : "Rpi is down :\\";
+                    LastRPIInfo.Text = rpitime;
+
+                    lblCarStatus.BackColor = carstat == "ON" ? Color.LightGreen : Color.Red;
+                    lblSrvrStatus.BackColor = rpistat == "UP" ? Color.LightGreen : Color.Red;
+                }
+
+                //respond with acknowledgement no matter what
+                
+            }
+            ClientMsgCache.AddMessageToServer("ACK_Status <EOF>");
+            timUpdateMe.Enabled = true;
         }
 
         
     }
+
 }

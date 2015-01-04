@@ -42,7 +42,7 @@ namespace SocketsExchangeService
 
             try
             {
-                var temp = new ClientListener("10.0.0.8", 10000, ClientType.RPIProducerClient);
+                var temp = new ClientListener("127.0.0.1", 24235, ClientType.RPIProducerClient);
                 RemCliConns.Add(temp);
 
                 var temp2 = new ClientListener("127.0.0.1", 10001, ClientType.ConsumerClient);
@@ -100,15 +100,15 @@ namespace SocketsExchangeService
                         }
                     }
 
-                    LatestRPI.SendToClients();         
+                    //LatestRPI.SendToClients();     naw...he just responded to a req     
                 }
                 else if (msg.Contains("StartCar"))
                 {
-
+                    ClientMsgCache.AddMessage(msg, ClientType.RPIProducerClient);
                 }
                 else
                 {
-
+                    return;
                 }
             }
             else if (ctSource == ClientType.RPIProducerClient)
@@ -164,8 +164,6 @@ namespace SocketsExchangeService
 
             }
         }
-
-
         
         void ImaBlipAClient (object sender, RunWorkerCompletedEventArgs e)
         {
@@ -195,7 +193,7 @@ namespace SocketsExchangeService
             string msg = "ACK_Status <EOF>";
             //CarState already in here
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " RPIClientEndPoint:" + Ipep);
-            msg = msg.Insert(msg.IndexOf(" <EOF>"), " CarState:" + Ipep);
+            msg = msg.Insert(msg.IndexOf(" <EOF>"), " CarState:" + CarState);
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " RPIState:" + RPIState);
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " InfoTime:" + InfoTime);
             ClientMsgCache.AddMessage(msg, ClientType.ConsumerClient);

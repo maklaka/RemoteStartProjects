@@ -1,6 +1,16 @@
 ﻿/* DEFAULTS
 ----------------------------------------------------------*/
 
+/*added to center all content*/
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
+}
+/*.....added to center all content*/
 body   
 {
     background: #b6b7bc;
@@ -9,6 +19,8 @@ body
     margin: 0px;
     padding: 0px;
     color: #696969;
+    display: table-cell;    /*added to center all content*/
+    vertical-align: middle; /*added to center all content*/
 }
 
 a:link, a:visited
@@ -31,6 +43,7 @@ p
 {
     margin-bottom: 10px;
     line-height: 1.6em;
+    height: 182px;
 }
 
 
@@ -41,7 +54,7 @@ h1, h2, h3, h4, h5, h6
 {
     font-size: 1.5em;
     color: #666666;
-    font-variant: small-caps;
+    font-variant: normal; /*small-caps was default*/
     text-transform: none;
     font-weight: 200;
     margin-bottom: 0px;
@@ -88,7 +101,7 @@ first child of the left and right table columns */
 
 .page
 {
-    width: 960px;
+    width: 443px;
     background-color: #fff;
     margin: 20px auto 0px auto;
     border: 1px solid #496077;
@@ -100,7 +113,9 @@ first child of the left and right table columns */
     margin: 0px;
     padding: 0px;
     background: #4b6c9e;
-    width: 100%;
+    width: 100%;  /*changed*/
+    top: 2px;
+    left: 1px;
 }
 
 .header h1
@@ -116,9 +131,10 @@ first child of the left and right table columns */
 
 .main
 {
-    padding: 0px 12px;
-    margin: 12px 8px 8px 8px;
-    min-height: 420px;
+    padding: 0px 7px;
+    /*margin: 12px 8px 8px 8px;*/
+    /*min-height: 420px;*/
+    width: 382px;
 }
 
 .leftCol

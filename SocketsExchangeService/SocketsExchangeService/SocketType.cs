@@ -19,26 +19,26 @@ namespace SocketsExchangeService
         protected byte[] bytes;
     }
 
-    class SendSock : SocketType
-    {
-        Socket sender;
-        public SendSock(string ip, int port)
-        {
-            bytes = new Byte[1024];
-            ipAddress = IPAddress.Parse(ip);
-            connEndPoint = new IPEndPoint(ipAddress, port);
-            sender = new Socket(AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, ProtocolType.Tcp);
-            sender.Connect(connEndPoint.Address, connEndPoint.Port);
-            //LOG MSG Connected to client
-        }
+    //class SendSock : SocketType
+    //{
+    //    Socket sender;
+    //    public SendSock(string ip, int port)
+    //    {
+    //        bytes = new Byte[1024];
+    //        ipAddress = IPAddress.Parse(ip);
+    //        connEndPoint = new IPEndPoint(ipAddress, port);
+    //        sender = new Socket(AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Stream, ProtocolType.Tcp);
+    //        sender.Connect(connEndPoint.Address, connEndPoint.Port);
+    //        //LOG MSG Connected to client
+    //    }
 
-        public void TransmitMessage(string msg)
-        {
-            bytes = Encoding.ASCII.GetBytes(msg +  "  " + sender.LocalEndPoint.ToString());
-            sender.Send(bytes);
-            //delete bytes?
-        }
-    }
+    //    public void TransmitMessage(string msg)
+    //    {
+    //        bytes = Encoding.ASCII.GetBytes(msg +  "  " + sender.LocalEndPoint.ToString());
+    //        sender.Send(bytes);
+    //        //delete bytes?
+    //    }
+    //}
 
     class RecSock : SocketType
     {

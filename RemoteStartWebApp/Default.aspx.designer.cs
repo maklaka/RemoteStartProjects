@@ -31,6 +31,15 @@ namespace RemoteStartWebApp {
         protected global::System.Web.UI.WebControls.TextBox txtPW;
         
         /// <summary>
+        /// lblResponse control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblResponse;
+        
+        /// <summary>
         /// btnLogIn control.
         /// </summary>
         /// <remarks>
@@ -47,14 +56,5 @@ namespace RemoteStartWebApp {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblServerWrite;
-        
-        /// <summary>
-        /// btnWriteBack control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnWriteBack;
     }
 }

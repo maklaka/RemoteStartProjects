@@ -20,12 +20,18 @@ namespace SocketsExchangeService
 
         public static void Log(string s)
         {
-            GlobSyn.gSync.Invoke(GlobSyn.gTakeThisLogMsg, new object[1] { s });
+            if (gTakeThisLogMsg != null && gSync != null)
+            {
+                GlobSyn.gSync.Invoke(GlobSyn.gTakeThisLogMsg, new object[1] { s });
+            }
         }
 
         public static void MsgFromClient(ClientType ctSource, uint CID, EndPoint ipep, string msg)  //add type  (rpi and control client?)
         {
-            GlobSyn.gSync.Invoke(gMsgFromClient, new object[4] {ctSource, CID, ipep, msg });
+            if (gTakeThisLogMsg != null && gSync != null)
+            {
+                GlobSyn.gSync.Invoke(gMsgFromClient, new object[4] { ctSource, CID, ipep, msg });
+            }
         }
 
     }

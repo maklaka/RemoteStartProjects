@@ -1,45 +1,52 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CarControl.aspx.cs" Inherits="RemoteStartWebApp.WebForm1" %>
+﻿<%@ Page Title="CarControl" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+    CodeBehind="CarControl.aspx.cs" Inherits="RemoteStartWebApp.CarControl" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
+</asp:Content>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title></title>
-</head>
-<body style="height: 337px">
-    <form id="form1" runat="server">
-    <div>
-    
-        <strong>Mark Jones Ford Focus 2012 Remote Start</strong><br />
+<asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
+
+
+    <asp:Button ID="btnStartTheCard" runat="server" Font-Size="X-Large" Height="57px" Text="Start The Car"  Width="422px" OnClick="btnStartTheCard_Click" style="text-align: center; position: relative; top: 18px; left: 1px; z-index: 1;"  />
         <br />
-        <asp:Button ID="btnStartCar" runat="server" Height="44px" Text="Start the Car" 
-            Width="288px" />
         <br />
-        <strong>
-        <asp:Panel ID="Panel1" runat="server" BackColor="#FFCC00" 
-            HorizontalAlign="Center" Width="289px">
-            <asp:Label ID="lblCommandStatus" runat="server" Text="No active command"></asp:Label>
-        </asp:Panel>
-        </strong>
         <br />
-        <strong>Car Info:</strong></div>
-    <asp:Panel ID="panCarInfo" runat="server">
-        <asp:Table ID="Table1" runat="server" Height="96px" Width="294px">
-            <asp:TableRow ID="ping" runat="server">
-                <asp:TableCell runat="server">Most recent ping:</asp:TableCell>
-                <asp:TableCell ID="cellPing" runat="server"></asp:TableCell>
+<asp:ScriptManager ID="ScriptManager1" runat="server"/>
+<div>
+    <asp:Timer ID="timUpdateMe" runat="server" Interval="3000" OnTick="timUpdateMe_Tick">
+    </asp:Timer>
+</div>
+<asp:UpdatePanel ID="UpdatePanel1" runat="server" >
+    <Triggers>
+        <asp:AsyncPostBackTrigger ControlID="timUpdateMe" EventName="Tick"/>
+    </Triggers>
+    <ContentTemplate>
+        <asp:Label ID="lblSrvrStatus" runat="server" Font-Size="X-Large" Height ="37px" Text="Waiting For Server Connection" Width="425px" style="text-align:center" BackColor="#FFFFCC"/>
+        <br />
+        <br />
+        <asp:Label ID="lblCarStatus" runat="server" BackColor="#FFFFCC" Font-Size="X-Large" Height="37px" style="text-align:center" Text="Unknown car state"   Width="425px" />
+        <br />
+        <br />
+        <asp:Table ID="tabInfo" runat="server" HorizontalAlign="Center" style="margin-left: 0px; margin-top: 0px; text-align: center; position: relative; top: -1px; left: 33px;" Width="304px">
+            <asp:TableRow runat="server">
+                <asp:TableCell runat="server" HorizontalAlign="Left">Last Message From RPI:</asp:TableCell>
+                <asp:TableCell ID="LastRPIInfo" runat="server" HorizontalAlign="Right"></asp:TableCell>
             </asp:TableRow>
-            <asp:TableRow ID="cmd" runat="server">
-                <asp:TableCell runat="server">Most recent cmd:</asp:TableCell>
-                <asp:TableCell ID="cellCMD" runat="server"></asp:TableCell>
-            </asp:TableRow>
-            <asp:TableRow ID="ipadd" runat="server">
-                <asp:TableCell runat="server">IP address:</asp:TableCell>
-                <asp:TableCell ID="cellIP" runat="server"></asp:TableCell>
+            <asp:TableRow runat="server">
+                <asp:TableCell runat="server" HorizontalAlign="Left">IP Endpoint:</asp:TableCell>
+                <asp:TableCell ID="IPEndPoint" runat="server" HorizontalAlign="Right"></asp:TableCell>
             </asp:TableRow>
         </asp:Table>
         <br />
-    </asp:Panel>
-    </form>
-</body>
-</html>
+        <br />
+    </ContentTemplate>
+</asp:UpdatePanel>
+
+
+
+
+
+    
+</asp:Content>
+
+

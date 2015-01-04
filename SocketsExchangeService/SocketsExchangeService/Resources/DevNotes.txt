@@ -11,7 +11,8 @@ MyIPAlive - every 2mi  (Car on/off status)
 ClientSetup IP:10.0.0.8 PORT:2345 <EOF>
 
 
-ACK_Status <EOF>
+ClientMsgCache.AddMessageToServer
+ACK_Status CarState:ON <EOF>
 ~~~~~connection will be rejected if two are waiting on an initial message already~~~~
 
 
@@ -24,3 +25,28 @@ implement client heartbeat?
 GlobSyn.MsgFromClient(this, retstr);
 
 diposed shit not working >.<
+
+
+cell ID
+
+LastRPIInfo
+IPEndPoint
+
+
+System.Net.Sockets.SocketException was unhandled
+  HResult=-2147467259
+  Message=Only one usage of each socket address (protocol/network address/port) is normally permitted
+  Source=System
+  ErrorCode=10048
+  NativeErrorCode=10048
+  StackTrace:
+       at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+       at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+       at SocketsExchangeService.RecSock..ctor(String ip, Int32 port) in c:\Users\Mark Jones\Documents\Visual Studio 2013\Projects\RemoteStartProjects\SocketsExchangeService\SocketsExchangeService\SocketType.cs:line 57
+       at SocketsExchangeService.ClientListener.TCP_Listener() in c:\Users\Mark Jones\Documents\Visual Studio 2013\Projects\RemoteStartProjects\SocketsExchangeService\SocketsExchangeService\ClientListener.cs:line 52
+       at System.Threading.ThreadHelper.ThreadStart_Context(Object state)
+       at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+       at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+       at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+       at System.Threading.ThreadHelper.ThreadStart()
+  InnerException: 

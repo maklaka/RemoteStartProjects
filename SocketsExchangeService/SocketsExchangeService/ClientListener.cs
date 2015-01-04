@@ -170,13 +170,13 @@ namespace SocketsExchangeService
 
                     GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, retstr);  
 
-                    if (retstr.Contains("ACK_Status "))
-                    {
+                    //if (retstr.Contains("ACK_Status "))
+                    //{
                         timKeepAlive.Stop();
                         timKeepAlive.Interval = 20000;
                         waitingForAck = false;
                         timKeepAlive.Start();
-                    }
+                    //}
                 }
             }     
             catch(Exception Ex)
@@ -196,7 +196,7 @@ namespace SocketsExchangeService
             {
                 do
                 {
-                    bytesRec = connection.Receive(bytes) - 2; //bytes rec getting set to two higher than contents of bytes? hmm. Does CR LF not get stored in bytes but is somehow in bytesRec??
+                    bytesRec = connection.Receive(bytes);// - 2; //bytes rec getting set to two higher than contents of bytes? hmm. Does CR LF not get stored in bytes but is somehow in bytesRec??
 
                     if (bytesRec > 0) //lock into receiving message until <EOF> detected
                     {
@@ -260,33 +260,33 @@ namespace SocketsExchangeService
             timKeepAlive.Stop();
             if (KeepAliveEnabled)
             {
-                if (waitingForAck)  //was not disabled by ACK, CONNECTION IS DEAD
-                {
+                //if (waitingForAck)  //was not disabled by ACK, CONNECTION IS DEAD
+                //{
                     //kill this whole thang?
                     GlobSyn.Log("FAILURE! Client is dead at " + connection.RemoteEndPoint.ToString() + " he isn't keeping up with ACKs :'(");
                     waitingForAck = false;
                     bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
-                }
-                else if (!transmittingNow) //only send ackreq if not actively transmitting already
-                {
-                    try
-                    {
-                        //bytes = Encoding.ASCII.GetBytes("AM I BEING SENT TO THE FUCKING SAME PC?! aint no localhost socket, son <EOF>");
-                        bytes = Encoding.ASCII.GetBytes("REQ <EOF>");
-                        connection.Send(bytes);
-                        waitingForAck = true;
-                        timKeepAlive.Interval = 1000 * 5; //expect reply within 400ms
-                        timKeepAlive.Start();
-                    }
-                    catch(Exception Ex) 
-                    {
-                        GlobSyn.Log("FAILURE! I was tryna send an ACK_Status but something got weird with:"  + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
-                    }
-                }
-                else
-                {
-                    timKeepAlive.Start();
-                }
+                //}
+                //else if (!transmittingNow) //only send ackreq if not actively transmitting already
+                //{
+                //    try
+                //    {
+                //        //bytes = Encoding.ASCII.GetBytes("AM I BEING SENT TO THE FUCKING SAME PC?! aint no localhost socket, son <EOF>");
+                //        bytes = Encoding.ASCII.GetBytes("REQ <EOF>");
+                //        connection.Send(bytes);
+                //        waitingForAck = true;
+                //        timKeepAlive.Interval = 1000 * 5; //expect reply within 400ms
+                //        timKeepAlive.Start();
+                //    }
+                //    catch(Exception Ex) 
+                //    {
+                //        GlobSyn.Log("FAILURE! I was tryna send an ACK_Status but something got weird with:"  + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
+                //    }
+                //}
+                //else
+               // {
+               //     timKeepAlive.Start();
+                //}
             }
             
         }
@@ -305,10 +305,14 @@ namespace SocketsExchangeService
             timKeepAlive.Stop();
             timRecMsgEscape.Stop();
             timSendChk.Stop();
-            
+
+            timKeepAlive.Dispose();
+            timRecMsgEscape.Dispose();
+            timSendChk.Dispose();
+
             SelfDestruct(this); //if I abort the thread I am running on...wat..wait BRAIN MELT??!?!? will this be reached? put abort afterwards...lesse
             connThread.Abort();
-
+            
             return 1;
         }
     }
