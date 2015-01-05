@@ -64,6 +64,7 @@ namespace SocketsExchangeService
             if(e.ClickedItem == tsmClose)
             {
                 this.Close();
+                //???
             }
             else if (e.ClickedItem == tsmHide)
             {
@@ -72,6 +73,7 @@ namespace SocketsExchangeService
             else if (e.ClickedItem == tsmShow)
             {
                 this.Show();
+                this.Visible = true;
             }
             
         }
@@ -83,6 +85,11 @@ namespace SocketsExchangeService
 
             lsvRemConClients.Columns[0].Width = this.lsvRemConClients.Width - 20;
             
+        }
+
+        private void tsmShow_Click(object sender, EventArgs e)
+        {
+            this.Show();
         }
     }
 }

@@ -12,9 +12,11 @@ ClientSetup IP:10.0.0.8 PORT:2345 <EOF>
 
 
 ClientMsgCache.AddMessageToServer
-ACK_Status CarState:ON <EOF>
+
 ~~~~~connection will be rejected if two are waiting on an initial message already~~~~
 
+
+ACK_Status CarState:ON <EOF>
 
 cory
 965

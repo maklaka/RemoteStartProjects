@@ -31,20 +31,15 @@ namespace SocketsExchangeService
 
         public ClientListener(string ip, int port, ClientType ct)
         {
-            //start backgroundthread and socket connection to client
-            //parentThread = owner;
+            //start backgroundthread RemConnClient listener
             clients = new List<TCPClientConn>();
             cType = ct;
             svrIP = ip;
             svrPort = port;
 
             ServeThread = new Thread(new ThreadStart(TCP_Listener));
+            ServeThread.IsBackground = true;
             ServeThread.Start();
-
-            //ServeThread = new BackgroundWorker();
-            //ServeThread.DoWork += ConnThread_DoWork;
-            //ServeThread.WorkerSupportsCancellation = true;
-            //ServeThread.RunWorkerAsync();
         }
 
         void TCP_Listener()
@@ -107,8 +102,6 @@ namespace SocketsExchangeService
         private System.Timers.Timer timRecMsgEscape;
 
         private bool KeepAliveEnabled = true;
-        private bool waitingForAck = false;
-        private bool transmittingNow = false;
         private byte[] bytes;
         private uint CID;
         private ClientType cType;
@@ -125,6 +118,8 @@ namespace SocketsExchangeService
             cType = ct;
             CID = ClientMsgCache.GenerateClientID(cType);
             connThread = new Thread(new ThreadStart(BidiChat));
+            //connThread.Priority = ThreadPriority.BelowNormal;
+            connThread.IsBackground = true;
             connThread.Start();  
 
         }
@@ -136,7 +131,6 @@ namespace SocketsExchangeService
 
             ClientMsgCache.ClientAdded(cType);
             GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ClientSetup <EOF>");
-            //GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ACK_Status <EOF>");
 
             timKeepAlive = new System.Timers.Timer();
             timKeepAlive.SynchronizingObject = synob;
@@ -165,18 +159,18 @@ namespace SocketsExchangeService
 
                     do
                     {
+                        Thread.Sleep(10);
                         retstr = ReceiveWholeMsg();
                     } while (retstr == null);
 
                     GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, retstr);  
 
-                    //if (retstr.Contains("ACK_Status "))
-                    //{
-                        timKeepAlive.Stop();
-                        timKeepAlive.Interval = 20000;
-                        waitingForAck = false;
-                        timKeepAlive.Start();
-                    //}
+                    timKeepAlive.Stop();
+                    timKeepAlive.Interval = 20000;
+                    timKeepAlive.Start();
+
+                    //Thread.Sleep(100);  //take a lil break before blocking on another receive
+                    
                 }
             }     
             catch(Exception Ex)
@@ -210,6 +204,7 @@ namespace SocketsExchangeService
                         timRecMsgEscape.Stop();
                         return data;
                     }
+                    
                 } while (msghere);
             }
             catch (SocketException Ex)
@@ -239,10 +234,8 @@ namespace SocketsExchangeService
             {
                 if (msg != null)
                 {
-                    transmittingNow = true;
                     bytes = Encoding.ASCII.GetBytes(msg);
                     connection.Send(bytes);
-                    transmittingNow = false;
                 }
  
                 timSendChk.Start();
@@ -253,40 +246,13 @@ namespace SocketsExchangeService
             }
         }
 
-
-
         private void KeepAliveTO(object derp, ElapsedEventArgs e)
         {
             timKeepAlive.Stop();
             if (KeepAliveEnabled)
             {
-                //if (waitingForAck)  //was not disabled by ACK, CONNECTION IS DEAD
-                //{
-                    //kill this whole thang?
-                    GlobSyn.Log("FAILURE! Client is dead at " + connection.RemoteEndPoint.ToString() + " he isn't keeping up with ACKs :'(");
-                    waitingForAck = false;
-                    bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
-                //}
-                //else if (!transmittingNow) //only send ackreq if not actively transmitting already
-                //{
-                //    try
-                //    {
-                //        //bytes = Encoding.ASCII.GetBytes("AM I BEING SENT TO THE FUCKING SAME PC?! aint no localhost socket, son <EOF>");
-                //        bytes = Encoding.ASCII.GetBytes("REQ <EOF>");
-                //        connection.Send(bytes);
-                //        waitingForAck = true;
-                //        timKeepAlive.Interval = 1000 * 5; //expect reply within 400ms
-                //        timKeepAlive.Start();
-                //    }
-                //    catch(Exception Ex) 
-                //    {
-                //        GlobSyn.Log("FAILURE! I was tryna send an ACK_Status but something got weird with:"  + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
-                //    }
-                //}
-                //else
-               // {
-               //     timKeepAlive.Start();
-                //}
+                GlobSyn.Log("FAILURE! Client is dead at " + connection.RemoteEndPoint.ToString() + " he isn't keeping up with ACKs :'(");
+                bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
             }
             
         }
@@ -316,7 +282,6 @@ namespace SocketsExchangeService
             return 1;
         }
     }
-
 }
 
 

@@ -82,7 +82,7 @@
             this.tsmHide,
             this.tsmShow});
             this.cmsTrayStrip.Name = "cmsTrayStrip";
-            this.cmsTrayStrip.Size = new System.Drawing.Size(179, 76);
+            this.cmsTrayStrip.Size = new System.Drawing.Size(179, 98);
             this.cmsTrayStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.cmsTrayStrip_ItemClicked);
             // 
             // tsmClose
@@ -107,6 +107,7 @@
             this.tsmShow.Name = "tsmShow";
             this.tsmShow.Size = new System.Drawing.Size(178, 22);
             this.tsmShow.Text = "Show ServiceLog";
+            this.tsmShow.Click += new System.EventHandler(this.tsmShow_Click);
             // 
             // txtTraffic
             // 

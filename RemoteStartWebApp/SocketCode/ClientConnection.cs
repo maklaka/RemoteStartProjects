@@ -92,6 +92,7 @@ namespace RemoteStartWebApp
 
                     do
                     {
+                        Thread.Sleep(10);
                         retstr = ReceiveWholeMsg();
                     } while (retstr == null);
 
