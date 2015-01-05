@@ -114,8 +114,9 @@ first child of the left and right table columns */
     padding: 0px;
     background: #4b6c9e;
     width: 100%;  /*changed*/
-    top: 2px;
-    left: 1px;
+    /*top: 2px;*/
+    /*left: -2px;*/
+    top: 0px;
 }
 
 .header h1
@@ -139,7 +140,7 @@ first child of the left and right table columns */
 
 .leftCol
 {
-    padding: 6px 0px;
+    /*padding: 6px 0px;*/
     margin: 12px 8px 8px 8px;
     width: 200px;
     min-height: 200px;

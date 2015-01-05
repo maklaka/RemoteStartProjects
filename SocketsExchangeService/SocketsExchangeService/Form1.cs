@@ -74,6 +74,7 @@ namespace SocketsExchangeService
             {
                 this.Show();
                 this.Visible = true;
+                this.BringToFront();
             }
             
         }
@@ -90,6 +91,8 @@ namespace SocketsExchangeService
         private void tsmShow_Click(object sender, EventArgs e)
         {
             this.Show();
+            this.Visible = true;
+            this.BringToFront();
         }
     }
 }

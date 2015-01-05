@@ -4,10 +4,6 @@
 <asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
-    <h2>
-        I am changing this header
-        - nothing you can do about it, homey
-    </h2>
     <p>
         <strong>Username:</strong><br />
         <asp:TextBox ID="txtUN" runat="server"></asp:TextBox>
@@ -19,12 +15,7 @@
             Text="Invalid credentials - try again mr hax" Visible="False"></asp:Label>
         <br />
         <asp:Button ID="btnLogIn" runat="server" onclick="btnLogIn_Click" 
-            Text="Log in" />
+            Text="Log in" Font-Size="Large" Height="45px" Width="160px" />
         </strong>
     </p>
-    <p>
-        <asp:Label ID="lblServerWrite" runat="server" 
-            Text="This label gon' change when you press that there button"></asp:Label>
-        <br />
-    </p>
-</asp:Content>
+    </asp:Content>

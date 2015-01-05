@@ -24,31 +24,24 @@ namespace RemoteStartWebApp
     {
         private Thread connThread;
         private System.Timers.Timer timSendChk;
-        //private System.Timers.Timer timKeepAlive;
         //private System.Timers.Timer timRecMsgEscape;
 
-        private string _SessionID;
-
-        //private bool KeepAliveEnabled = true;
         //private bool waitingForAck = false;
         //private bool transmittingNow = false;
         private byte[] bytes;
-
         Socket connection;
         IPEndPoint _remoteEP;
-
-        public string SessionID { get { return _SessionID; } set { _SessionID = value; } }
-
         public ClientKiller SelfDestruct;
 
         private bool disposing = false;
+        ClientMsgCache _msgCache;
 
         //public ClientKiller SelfDestruct;
 
-        public TCPClientConn(IPEndPoint ipep, string sid)
+        public TCPClientConn(IPEndPoint ipep, ClientMsgCache cache)
         {
             _remoteEP = ipep;
-            _SessionID = sid;
+            _msgCache = cache;
             connThread = new Thread(new ThreadStart(BidiChat));
             connThread.Start();
         }
@@ -61,18 +54,7 @@ namespace RemoteStartWebApp
             // Send the data through the socket.
             int bytesSent = connection.Send(bytes);
 
-            //ClientMsgCache.ClientAdded(cType);
-            //GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ClientSetup <EOF>");
-            ////GlobSyn.MsgFromClient(cType, CID, connection.RemoteEndPoint, "ACK_Status <EOF>");
-
-            //timKeepAlive = new System.Timers.Timer();
-            //timKeepAlive.SynchronizingObject = synob;
-            //timKeepAlive.Elapsed += new ElapsedEventHandler(KeepAliveTO);
-            //timKeepAlive.Interval = 1000 * 20;  //at 20 seconds, 18 bytes per exchange, should be 2.3MB/month
-            //timKeepAlive.Start();
-
             timSendChk = new System.Timers.Timer();
-            //timSendChk.SynchronizingObject = synob;
             timSendChk.Elapsed += new ElapsedEventHandler(GrabTransmissionInCache); //check for message to send every 100ms
             timSendChk.Interval = 1000;
             timSendChk.Start();
@@ -97,7 +79,7 @@ namespace RemoteStartWebApp
                     } while (retstr == null);
 
 
-                    ClientMsgCache.AddMessageToPage(retstr);
+                    _msgCache.AddMessageToPage(retstr);
                     //Cac.MsgFromServer(sendy.RemoteEndPoint, retstr);
                 
                 }
@@ -130,7 +112,7 @@ namespace RemoteStartWebApp
 
                     if (data.IndexOf("<EOF>") > -1)
                     {
-                        ClientMsgCache.AddMessageToServer("ACK_Status <EOF>");
+                        _msgCache.AddMessageToServer("ACK_Status <EOF>");
                         return data;
                     }
                 } while (msghere);
@@ -156,16 +138,14 @@ namespace RemoteStartWebApp
         private void GrabTransmissionInCache(object derp, ElapsedEventArgs e)
         {
             string msg;
-            msg = ClientMsgCache.ReadMsgForServer();
+            msg = _msgCache.ReadMsgForServer();
 
             try
             {
                 if (msg != null)
                 {
-                    //transmittingNow = true;
                     bytes = Encoding.ASCII.GetBytes(msg);
                     connection.Send(bytes);
-                    //transmittingNow = false;
                 }
 
                 timSendChk.Start();

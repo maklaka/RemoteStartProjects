@@ -84,8 +84,9 @@ namespace SocketsExchangeService
                             break;
                         }
                     }
-                    
-                    //parentForm.lsbRemConClients.Invoke((MethodInvoker)(() => parentForm.lsbRemConClients.Items.Remove(ipep.ToString())));
+                    //?? For now, turn off car when client DC's
+                    //LatestRPI.CarState = "OFF";
+                   
                 }
                 else if (msg.Contains("ACK_Status")) //meh, just for knowing the remconclient is alive...but respond with a full ack from rpi
                 {
@@ -105,6 +106,10 @@ namespace SocketsExchangeService
                 else if (msg.Contains("StartCar"))
                 {
                     ClientMsgCache.AddMessage(msg, ClientType.RPIProducerClient);
+                    
+                    //?? For now pass back to client that he started the car, SHHHHH.  He won't know
+                    //LatestRPI.CarState = "ON";
+                    //LatestRPI.SendToClients();
                 }
                 else
                 {

@@ -23,15 +23,6 @@ namespace RemoteStartWebApp
             if(!IsPostBack)
             {
                 SessionManager.AddSession(Session.SessionID);
-                //timUpdateMe.Interval = 1000;
-                //timReadFromSrvr = new System.Timers.Timer();
-                //timReadFromSrvr.Interval = 100;
-
-                //timReadFromSrvr.Elapsed += timReadFromSrvr_Elapsed;
-                //conn.SelfDestruct += new ClientKiller(MuderThatClientAtHisBehest);
-
-                //timReadFromSrvr.Start();
-
             }
 
         }
@@ -50,46 +41,18 @@ namespace RemoteStartWebApp
         private void MuderThatClientAtHisBehest(TCPClientConn conn)
         {
             //taking the object out of any scope should get her good and garbage collected...eventually >.V  hopefully the thread actually stopped
-
             conn = null;
         }
 
-        //protected void timUpdateMe_Tick(object sender, EventArgs e)
-        //{
-        //    string msg;
-        //    msg = ClientMsgCache.ReadMsgForPage();
-        //    if (msg != null)
-        //    {
-        //        if (msg.Contains("ACK_Status"))
-        //        {
-        //            string ipep = msg.Substring(msg.IndexOf("RPIClientEndPoint:")).Split(' ')[0].Replace("RPIClientEndPoint:", "");
-        //            string carstat = msg.Substring(msg.IndexOf("CarState:")).Split(' ')[0].Replace("CarState:", "");;
-        //            string rpistat = msg.Substring(msg.IndexOf("RPIState:")).Split(' ')[0].Replace("RPIState:", "");
-        //            string rpitime = msg.Substring(msg.IndexOf("InfoTime:")).Split(' ')[0].Replace("InfoTime:", "");
-
-        //            IPEndPoint.Text = ipep;
-        //            lblCarStatus.Text = carstat == "ON" ? "Car is on!" : "Car is off";
-        //            lblSrvrStatus.Text = rpistat == "UP" ? "Rpi is up and running!" : "Rpi is down :\\";
-        //            LastRPIInfo.Text = rpitime;
-
-        //            lblCarStatus.BackColor = carstat == "ON" ? Color.LightGreen : Color.Red;
-        //            lblSrvrStatus.BackColor = rpistat == "UP" ? Color.LightGreen : Color.Red;
-        //        }
-
-        //        //respond with acknowledgement no matter what
-        //        ClientMsgCache.AddMessageToServer("ACK_Status <EOF>");
-        //    }
-        //}
-
         protected void btnStartTheCard_Click(object sender, EventArgs e)
         {
-            ClientMsgCache.AddMessageToServer("StartCar <EOF>");
+            SessionManager.MyCache(Session.SessionID).AddMessageToServer("StartCar <EOF>");
         }
 
         protected void timUpdateMe_Tick(object sender, EventArgs e)
         {
             string msg;
-            msg = ClientMsgCache.ReadMsgForPage();
+            msg = SessionManager.MyCache(Session.SessionID).ReadMsgForPage();
             if (msg != null)
             {
                 if (msg.Contains("ACK_Status"))
@@ -111,11 +74,8 @@ namespace RemoteStartWebApp
                 //respond with acknowledgement no matter what
                 
             }
-            ClientMsgCache.AddMessageToServer("ACK_Status <EOF>");
+            SessionManager.MyCache(Session.SessionID).AddMessageToServer("ACK_Status <EOF>");
             timUpdateMe.Enabled = true;
-        }
-
-        
+        } 
     }
-
 }
