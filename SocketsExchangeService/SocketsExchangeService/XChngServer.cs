@@ -42,7 +42,7 @@ namespace SocketsExchangeService
 
             try
             {
-                var temp = new ClientListener("127.0.0.1", 24235, ClientType.RPIProducerClient);
+                var temp = new ClientListener("172.31.32.247", 24235, ClientType.RPIProducerClient); //will be 127.0.0.1
                 RemCliConns.Add(temp);
 
                 var temp2 = new ClientListener("127.0.0.1", 10001, ClientType.ConsumerClient);
@@ -106,7 +106,8 @@ namespace SocketsExchangeService
                 else if (msg.Contains("StartCar"))
                 {
                     ClientMsgCache.AddMessage(msg, ClientType.RPIProducerClient);
-                    
+                    parentForm.txtTraffic.Text = ">> " + DateTime.Now.TimeOfDay + " - " + " (RemCon -> Rpi) " + msg + Environment.NewLine + parentForm.txtTraffic.Text;
+                   
                     //?? For now pass back to client that he started the car, SHHHHH.  He won't know
                     //LatestRPI.CarState = "ON";
                     //LatestRPI.SendToClients();

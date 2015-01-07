@@ -57,6 +57,8 @@ namespace SocketsExchangeService
         private void trayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             this.Show();
+            this.Visible = true;
+            this.BringToFront();
         }
 
         private void cmsTrayStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
