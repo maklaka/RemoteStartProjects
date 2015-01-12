@@ -34,21 +34,47 @@ cell ID
 LastRPIInfo
 IPEndPoint
 
+FOR STARTUP
 
-System.Net.Sockets.SocketException was unhandled
-  HResult=-2147467259
-  Message=Only one usage of each socket address (protocol/network address/port) is normally permitted
-  Source=System
-  ErrorCode=10048
-  NativeErrorCode=10048
-  StackTrace:
-       at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
-       at System.Net.Sockets.Socket.Bind(EndPoint localEP)
-       at SocketsExchangeService.RecSock..ctor(String ip, Int32 port) in c:\Users\Mark Jones\Documents\Visual Studio 2013\Projects\RemoteStartProjects\SocketsExchangeService\SocketsExchangeService\SocketType.cs:line 57
-       at SocketsExchangeService.ClientListener.TCP_Listener() in c:\Users\Mark Jones\Documents\Visual Studio 2013\Projects\RemoteStartProjects\SocketsExchangeService\SocketsExchangeService\ClientListener.cs:line 52
-       at System.Threading.ThreadHelper.ThreadStart_Context(Object state)
-       at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
-       at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
-       at System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
-       at System.Threading.ThreadHelper.ThreadStart()
-  InnerException: 
+gotta edi inittab
+
+
+wait 15 seconds for modem to boot up to full power
+run wvdial
+
+kill wvdial by processID (will need list of processess)
+drop gate voltage to fet for modem
+
+
+
+
+
+
+if modemState == 1 and  (time.clock() - lastModemActivation) < 0.16:    #on for about 24 seconds?	
+
+	do stuff
+
+elif modemState == 1
+
+	
+	kill wvdial
+	turn off modem
+	go into low power mode somehow mehbeh?
+
+
+
+
+
+
+
+
+
+
+
+
+		pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+		for pid in pids:
+			try:
+				print open(os.path.join('/proc', pid, 'wvdial'), 'rb').read()
+			except IOError: # proc has already terminated
+				continue

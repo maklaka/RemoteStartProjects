@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
+using System.Net.Configuration;
 using System.Net.Sockets;
 using System.ComponentModel;
 using System.Timers;
@@ -17,7 +18,7 @@ namespace SocketsExchangeService
 {
     public class XChngServer 
     {
-        List<ClientListener> RemCliConns;
+        List<ClientListener> ClientListeners;
         //public RemConCliListener RPIClient;
         frmServiceLog parentForm;
 
@@ -25,13 +26,15 @@ namespace SocketsExchangeService
         
         private SockMsg MsgFromClient;
         private LogMsg TakeThisLogMsg;
+
+        IPAddress ipaddy;
         
 
         public XChngServer(frmServiceLog par)
         {
             parentForm = par;
             LatestRPI = new LatestRPIInfo();
-            RemCliConns = new List<ClientListener>();
+            ClientListeners = new List<ClientListener>();
             
 
             TakeThisLogMsg = new LogMsg(OnLogMsg);
@@ -42,11 +45,18 @@ namespace SocketsExchangeService
 
             try
             {
-                var temp = new ClientListener("172.31.32.247", 24235, ClientType.RPIProducerClient); //will be 127.0.0.1
-                RemCliConns.Add(temp);
+                
+                ipaddy = Dns.GetHostEntry(Dns.GetHostName()).AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+               
+                var temp = new ClientListener(ipaddy.ToString(), 24235, ClientType.RPIProducerClient);
+                //var temp = new ClientListener("127.0.0.1", 24235, ClientType.RPIProducerClient); //will be 127.0.0.1
+                //var temp = new ClientListener("172.31.32.247", 24235, ClientType.RPIProducerClient); //bind to internal IP on ethernet port?
+                ClientListeners.Add(temp);
+
+                parentForm.Text = "Socket Exchange Service on " + ipaddy.ToString();
 
                 var temp2 = new ClientListener("127.0.0.1", 10001, ClientType.ConsumerClient);
-                RemCliConns.Add(temp2);
+                ClientListeners.Add(temp2);
             }
             catch (Exception ex)
             {

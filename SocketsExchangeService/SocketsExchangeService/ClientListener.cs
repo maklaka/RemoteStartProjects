@@ -105,6 +105,7 @@ namespace SocketsExchangeService
         private byte[] bytes;
         private uint CID;
         private ClientType cType;
+        private uint SessionTime; //in 100ms increments
        
         
         private bool disposing = false;
@@ -116,6 +117,7 @@ namespace SocketsExchangeService
             connection = handle;
             connection.ReceiveTimeout = 500;   //not presently used? maybe?  I'm in "non-blocking" sychronous mode..whatever that means?!!????
             cType = ct;
+            SessionTime = 0;
             CID = ClientMsgCache.GenerateClientID(cType);
             connThread = new Thread(new ThreadStart(BidiChat));
             //connThread.Priority = ThreadPriority.BelowNormal;
@@ -228,7 +230,7 @@ namespace SocketsExchangeService
         private void GrabTransmissionInCache(object derp, ElapsedEventArgs e)
         {
             string msg;
-            msg = ClientMsgCache.Read(CID, cType);
+            msg = ClientMsgCache.Read(CID, cType); 
             
             try
             {
@@ -244,6 +246,15 @@ namespace SocketsExchangeService
             {
                 GlobSyn.Log("FAILURE! Error while xmitting to client " + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~See Exception: " + Ex.Message);
             }
+
+
+            SessionTime += 100; //add 100ms
+            if(cType == ClientType.ConsumerClient &&  SessionTime / (5 * 60 * 1000) > 0) //over 5 minutes of connection?  kill 'im
+            {
+                GlobSyn.Log("RemConClient reached max connection time (5 minutes) " + connection.RemoteEndPoint.ToString() + Environment.NewLine + "~~~Killing the connection");
+                bytes[0] = disposing ? (byte)0 : ThisConnectionSucks();
+            }
+
         }
 
         private void KeepAliveTO(object derp, ElapsedEventArgs e)
