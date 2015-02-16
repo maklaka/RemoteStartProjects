@@ -6,11 +6,6 @@
 
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
 
-
-    <asp:Button ID="btnStartTheCard" runat="server" Font-Size="X-Large" Height="57px" Text="Start The Car"  Width="422px" OnClick="btnStartTheCard_Click" style="text-align: center; position: relative; top: 18px; left: 1px; z-index: 1;"  />
-        <br />
-        <br />
-        <br />
 <asp:ScriptManager ID="ScriptManager1" runat="server"/>
 <div>
     <asp:Timer ID="timUpdateMe" runat="server" Interval="3000" OnTick="timUpdateMe_Tick">
@@ -21,8 +16,17 @@
         <asp:AsyncPostBackTrigger ControlID="timUpdateMe" EventName="Tick"/>
     </Triggers>
     <ContentTemplate>
+
+        <asp:Button ID="btnStartTheCar" runat="server" Font-Size="X-Large" Height="57px" Text="Start The Car!"  Width="422px" OnClick="btnStartTheCar_Click" style="text-align: center; position: relative; top: 18px; left: 1px; z-index: 1;"  />
+        <br />
+        <br />
+        <asp:Label ID="lblMessageStatus" runat="server" style="text-align:center" Text="No message sent..." Width="425px"/>
+        <br />
+
+
         <asp:Label ID="lblSrvrStatus" runat="server" Font-Size="X-Large" Height ="37px" Text="Waiting For Server Connection" Width="425px" style="text-align:center" BackColor="#FFFFCC"/>
         <br />
+        <asp:Label ID="lblLastIHeard" runat="server" Text="Last I Heard from the RPI:"  style="text-align:center" Width="425px"/>
         <br />
         <asp:Label ID="lblCarStatus" runat="server" BackColor="#FFFFCC" Font-Size="X-Large" Height="37px" style="text-align:center" Text="Unknown car state"   Width="425px" />
         <br />

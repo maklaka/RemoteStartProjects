@@ -18,7 +18,7 @@ namespace RemoteStartWebApp
 
         protected void btnLogIn_Click(object sender, EventArgs e)
         {
-            if (txtUN.Text == "jamesinks" && txtPW.Text == "creeper")
+            if (txtUN.Text == "maklaka" && txtPW.Text == "pkopkopko")
             {
                 Session["New"] = txtUN.Text;
                 Response.Redirect("CarControl.aspx");

@@ -69,7 +69,7 @@ namespace SocketsExchangeService
 
         public void OnLogMsg(String msg)
         {
-            parentForm.txtLog.Invoke((MethodInvoker)(() => parentForm.txtLog.Text = ">> " + DateTime.Now.TimeOfDay + " - " + msg + Environment.NewLine + parentForm.txtLog.Text));
+            parentForm.txtLog.Invoke((MethodInvoker)(() => parentForm.txtLog.Text = ">> " + String.Format("{0:G}", DateTime.Now) + " - " + msg + Environment.NewLine + parentForm.txtLog.Text));
         }
         public void OnMsgFromClient(ClientType ctSource, uint CID, EndPoint ipep, string msg) 
         {
@@ -116,7 +116,7 @@ namespace SocketsExchangeService
                 else if (msg.Contains("StartCar"))
                 {
                     ClientMsgCache.AddMessage(msg, ClientType.RPIProducerClient);
-                    parentForm.txtTraffic.Text = ">> " + DateTime.Now.TimeOfDay + " - " + " (RemCon -> Rpi) " + msg + Environment.NewLine + parentForm.txtTraffic.Text;
+                    parentForm.txtTraffic.Text = ">> " + String.Format("{0:G}", DateTime.Now) + " - " + " (RemCon -> Rpi) " + msg + Environment.NewLine + parentForm.txtTraffic.Text;
                    
                     //?? For now pass back to client that he started the car, SHHHHH.  He won't know
                     //LatestRPI.CarState = "ON";
@@ -132,8 +132,8 @@ namespace SocketsExchangeService
                 if (msg.Contains("ClientSetup"))  //
                 {
                 //update RPI info 
-                    LatestRPI.Ipep = ipep.ToString(); 
-                    LatestRPI.InfoTime = DateTime.Now.TimeOfDay.ToString(); ;
+                    LatestRPI.Ipep = ipep.ToString();
+                    LatestRPI.InfoTime = String.Format("{0:G}", DateTime.Now);
                     LatestRPI.RPIState = "UP";
                 //prep/send message on to remcon clients
                     LatestRPI.SendToClients();
@@ -146,7 +146,7 @@ namespace SocketsExchangeService
                 else if (msg.Contains("ClientKilled"))
                 {
                 // parentForm.lblRPIEndPoint.Text = "N/A";  leave the IP alone?  Will just update with next ACK_Status I s'pose
-                    LatestRPI.InfoTime = DateTime.Now.TimeOfDay.ToString();
+                    LatestRPI.InfoTime = String.Format("{0:G}", DateTime.Now);
                     LatestRPI.RPIState = "DOWN";
                 //prep/send message on to remcon clients
                     LatestRPI.SendToClients();
@@ -157,8 +157,8 @@ namespace SocketsExchangeService
                 else if (msg.Contains("ACK_Status"))  //Arrives With: "CarState:""ON" or "OFF" ----- Also leaves with: "RPIClientEndPoint:"IP:PORT   , "InfoTime:"LatestRPI.InfoTime    , "RPIState:""UP" or "DOWN"
                 {
                 //update RPI info 
-                    LatestRPI.Ipep = ipep.ToString(); 
-                    LatestRPI.InfoTime = DateTime.Now.TimeOfDay.ToString();                                                 
+                    LatestRPI.Ipep = ipep.ToString();
+                    LatestRPI.InfoTime = String.Format("{0:G}", DateTime.Now);                                               
                     LatestRPI.RPIState = "UP";                                                                              
                     LatestRPI.CarState = msg.Substring(msg.IndexOf("CarState:")).Split(' ')[0].Replace("CarState:", "");   
                 //prep/send message on to remcon clients
@@ -211,7 +211,7 @@ namespace SocketsExchangeService
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " RPIClientEndPoint:" + Ipep);
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " CarState:" + CarState);
             msg = msg.Insert(msg.IndexOf(" <EOF>"), " RPIState:" + RPIState);
-            msg = msg.Insert(msg.IndexOf(" <EOF>"), " InfoTime:" + InfoTime);
+            msg = msg.Insert(msg.IndexOf(" <EOF>"), " InfoTime:" + InfoTime + '~');
             ClientMsgCache.AddMessage(msg, ClientType.ConsumerClient);
         }
 

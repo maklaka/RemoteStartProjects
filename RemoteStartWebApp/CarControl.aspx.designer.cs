@@ -13,15 +13,6 @@ namespace RemoteStartWebApp {
     public partial class CarControl {
         
         /// <summary>
-        /// btnStartTheCard control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnStartTheCard;
-        
-        /// <summary>
         /// ScriptManager1 control.
         /// </summary>
         /// <remarks>
@@ -49,6 +40,24 @@ namespace RemoteStartWebApp {
         protected global::System.Web.UI.UpdatePanel UpdatePanel1;
         
         /// <summary>
+        /// btnStartTheCar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnStartTheCar;
+        
+        /// <summary>
+        /// lblMessageStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMessageStatus;
+        
+        /// <summary>
         /// lblSrvrStatus control.
         /// </summary>
         /// <remarks>
@@ -56,6 +65,15 @@ namespace RemoteStartWebApp {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblSrvrStatus;
+        
+        /// <summary>
+        /// lblLastIHeard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLastIHeard;
         
         /// <summary>
         /// lblCarStatus control.
