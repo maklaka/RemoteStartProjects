@@ -48,7 +48,7 @@ namespace RemoteStartWebApp
         {
             if (lblSrvrStatus.Text == "Rpi is up and running!")
             {
-                SessionManager.MyCache(Session.SessionID).AddMessageToServer("StartCar <EOF> ");
+                SessionManager.MyCache(Session.SessionID).AddMessageToServer("StartCar <EOF>");
                 lblMessageStatus.Text = "Message sent at: " + String.Format("{0:T}", DateTime.Now);
             }
             else
