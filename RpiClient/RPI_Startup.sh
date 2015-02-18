@@ -11,10 +11,10 @@
 # Description:       This service is used to fire up my remote start 3G connection and client program
 ### END INIT INFO
 
-echo "I am trying to run this shit mang."
-sudo /usr/bin/wvdial > dial_log.txt 2> dial_err.txt & 
-echo "I started wvdial" 
-sleep 17 
-echo "Back from sleep" 
+#echo "I am trying to run this shit mang."
+#sudo /usr/bin/wvdial > dial_log.txt 2> dial_err.txt & 
+#echo "I started wvdial" 
+#sleep 17 
+#echo "Back from sleep" 
 sudo /usr/bin/python /home/pi/TestClient.py
-echo "I started your python client as well"
+echo "I started your remote start python client"

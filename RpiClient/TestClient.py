@@ -14,13 +14,9 @@ modemPwrPin = 26
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(carSensePin, GPIO.IN)
 GPIO.setup(radioPin, GPIO.OUT, initial=GPIO.LOW)
-GPIO.setup(modemPwrPin, GPIO.OUT, initial=GPIO.HIGH)  #get that modem power on
+GPIO.setup(modemPwrPin, GPIO.OUT, initial=GPIO.HIGH) 
 
-##
-##
-##  run wvdial once and wait!
-##
-##
+proc = subprocess.Popen(['/usr/bin/wvdial']) 
 
 HOST = '54.148.253.160'    # The remote host
 PORT = 24235              # The same port as used by the server
@@ -68,7 +64,7 @@ while 1:
 		modemState = 2
 	
 	#keep sending/receiving messages while modem is up and either the car is on or modem has been running less than 10 seconds
-	if ((time.time() - modemTimer < 10 or carState == 'ON') && modemState == 0  ):
+	if ((time.time() - modemTimer < 10 or carState == 'ON') and modemState == 0  ):
 		if  (time.time() - lastPingTime) > 5:                        # this  will double as connection tester, send every 5 seconds with modem up
 			lastPingTime = time.time()
 			try:
@@ -102,21 +98,44 @@ while 1:
 		data = ''	
 	
 	elif modemState == 0:
-		#killWVdial process by name
-		GPIO.output(modemPwrPin, GPIO.LOW)
-		modemState == 1
+		print 'Shutting off socket and killing WVDIAL'
+		s.shutdown(socket.SHUT_RDWR)
+		s.close()
+	    #killWVdial process by name
+		#subprocess.Popen("xterm -hold -e KillWVDIAL.sh" , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)		
+		proc.terminate()
+		modemState = 1
 		modemTimer = time.time()
-	elif modemState == 1 and time.time() - modemTimer > 90:     #will be 90 seconds.  Modem has been off for awhile...plug back in, wait ten seconds in state 2, then fire up wvdial
-		GPIO.output(modemPwrPin, GPIO.HIGH)
+	elif modemState == 1 and time.time() - modemTimer > 2: 
+		print 'Cutting power to modem'
+		GPIO.output(modemPwrPin, GPIO.LOW)  #cut power to modem
 		modemTimer = time.time()
 		modemState = 2
-	elif modemState == 2 time.time() - modemTimer > 9.9:      #modem should be booted by now, run wvdial, wait another ten seconds in state 3, then put process in operating mode (modemstate 1)
+	elif modemState == 2 and time.time() - modemTimer > 20:     #will be 90 seconds.  Modem has been off for awhile...plug back in, wait ten seconds in state 3, then fire up 
+		print 'Waited 90 seconds, turning modem on'
+		GPIO.output(modemPwrPin, GPIO.HIGH)
 		modemTimer = time.time()
 		modemState = 3
-		#start WVDial process.  Run output into log file sudo /usr/bin/wvdial > dial_log.txt 2> dial_err.txt & 
-	elif modemState == 3 time.time() - modemTimer > 9.9:      #modem should be booted by now, run wvdial, wait another ten seconds in state 3, then put process in operating mode (modemstate 1)
+	elif modemState == 3 and time.time() - modemTimer > 9.9:      #modem should be booted by now, run wvdial, wait another ten seconds in state 3, then put process in operating mode 4
+		print 'Waited for 10s for modem to boot, now starting wvdial'
+		#start WVDial process.  Run output into log file
+		#subprocess.Popen("xterm -hold -e StartWVDIAL.sh" , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		proc = subprocess.Popen(['/usr/bin/wvdial']) 
 		modemTimer = time.time()
+		modemState = 4
+		
+	elif modemState == 4 and time.time() - modemTimer > 9.9:      #wvdial should be running by now - put process in operating mode 0
+		modemTimer = time.time()
+		print 'Waited 10s for wvdial, now entering main message loop'
 		modemState = 0	
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		try:
+			s.connect((HOST, PORT))
+		except Exception as  inst:
+			print inst
+			
+		s.setblocking(0)   #make non blocking after a connection is actually made	
+		s.sendall('<EOF>')   #makes me a real client at dah soyvah
 	
 	
 	time.sleep(0.0005)
