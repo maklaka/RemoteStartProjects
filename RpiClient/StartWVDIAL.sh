@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo /usr/bin/wvdial > dial_log.txt 2> dial_err.txt & 
+nohup node /usr/bin/wvdial > /dev/null 2>&1 &

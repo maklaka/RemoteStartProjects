@@ -5,8 +5,6 @@ import time
 import os
 import subprocess, signal
 
-
-
 carSensePin = 11
 radioPin = 15
 modemPwrPin = 26
@@ -16,8 +14,16 @@ GPIO.setup(carSensePin, GPIO.IN)
 GPIO.setup(radioPin, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(modemPwrPin, GPIO.OUT, initial=GPIO.HIGH) 
 
-proc = subprocess.Popen(['/usr/bin/wvdial']) 
-
+#start wvdial for first time and wait 10s for it to finish
+print 'Starting wvdial for the first time...wait 10s'
+diallog = open('dial_log')
+derplog = open('derp_log')
+proc = subprocess.Popen(['nohup', '/usr/bin/wvdial', '&']) 
+modemTimer = time.time()
+while time.time() - modemTimer < 16:
+	derp = 0
+	
+	
 HOST = '54.148.253.160'    # The remote host
 PORT = 24235              # The same port as used by the server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,16 +117,16 @@ while 1:
 		GPIO.output(modemPwrPin, GPIO.LOW)  #cut power to modem
 		modemTimer = time.time()
 		modemState = 2
-	elif modemState == 2 and time.time() - modemTimer > 20:     #will be 90 seconds.  Modem has been off for awhile...plug back in, wait ten seconds in state 3, then fire up 
+	elif modemState == 2 and time.time() - modemTimer > 20:     #will be 90 seconds.  Modem has been off for awhile...plug back in, wait 12 seconds in state 3, then fire up 
 		print 'Waited 90 seconds, turning modem on'
 		GPIO.output(modemPwrPin, GPIO.HIGH)
 		modemTimer = time.time()
 		modemState = 3
-	elif modemState == 3 and time.time() - modemTimer > 9.9:      #modem should be booted by now, run wvdial, wait another ten seconds in state 3, then put process in operating mode 4
+	elif modemState == 3 and time.time() - modemTimer > 12:      #modem should be booted by now, run wvdial, wait another ten seconds in state 3, then put process in operating mode 4
 		print 'Waited for 10s for modem to boot, now starting wvdial'
 		#start WVDial process.  Run output into log file
 		#subprocess.Popen("xterm -hold -e StartWVDIAL.sh" , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		proc = subprocess.Popen(['/usr/bin/wvdial']) 
+		proc = subprocess.Popen(['nohup', '/usr/bin/wvdial', '&']) 
 		modemTimer = time.time()
 		modemState = 4
 		
