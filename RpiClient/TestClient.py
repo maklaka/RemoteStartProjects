@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import time
 import os
 import subprocess, signal
+from datetime import datetime
 
 carSensePin = 11
 radioPin = 15
@@ -20,7 +21,7 @@ print 'Starting wvdial for the first time...wait 10s'
 #derplog = open('derp_log')
 
 modemTimer = time.time()
-while time.time() - modemTimer < 10:
+while time.time() - modemTimer < 15:
 	derp = 0
 
 proc = subprocess.Popen(['nohup', '/usr/bin/wvdial', '&']) 
@@ -28,18 +29,19 @@ proc = 0
 
 
 modemTimer = time.time()
-while time.time() - modemTimer < 12:
+while time.time() - modemTimer < 15:
 	derp = 0
 	
 	
-HOST = repr(socket.gethostbyname('aws.mjcpe.com'))    # The remote host
+#HOST = repr(socket.gethostbyname('aws.mjcpe.com'))    # The remote host
+HOST = '54.148.253.160'
 PORT = 24235              # The same port as used by the server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
 	s.connect((HOST, PORT))
 except Exception as e:
 	with open("rebootLog", "a") as myfile:
-		myfile.write("\n\ncase: first connection at boot\n         " + repr(e))
+		myfile.write("\n\ncase: first connection at boot\n         " + repr(e) + str(datetime.now()))
 		
 	os.system("sudo shutdown -r now")
 	
@@ -49,6 +51,7 @@ s.sendall('<EOF>')   #makes me a real client at dah soyvah
 lastPingTime = time.time()
 modemTimer = time.time()
 latchStartTime = time.time()
+carUpResetTime = time.time()
 
 carState = 'OFF'
 pinState = 0
@@ -68,6 +71,7 @@ while 1:
 		# assign to carState according to input pin  
 		if GPIO.input(carSensePin) == True and carState == 'OFF':   #captures change of car from off to on once
 				carState = 'ON'
+				carUpResetTime = time.time()
 				if modemState == 0:  #tell server the car is running right now if the modem is up by some slim chance
 					s.sendall('ACK_Status CarState:' + carState + ' <EOF>')  #just turned on,  send status!
 		elif GPIO.input(carSensePin) == False and carState == 'ON': #captures change of car from on to off once
@@ -81,15 +85,15 @@ while 1:
 		#	modemState = 3
 		
 		#keep sending/receiving messages while modem is up and: either the car is on or modem has been running less than 10 seconds
-		if(modemState == 0)
-			if ((time.time() - modemTimer < 10 or carState == 'ON' or startMsgToConsume == True)):
+		if(modemState == 0):
+			if ((time.time() - modemTimer) < 10 or startMsgToConsume == True or (carState == 'ON' and (time.time() - carUpResetTime < 600 ))):
 				if  (time.time() - lastPingTime) > 5:                        # this  will double as connection tester, send every 5 seconds with modem up
 					lastPingTime = time.time()
 					try:
 						s.sendall('ACK_Status CarState:' + carState + ' <EOF>')
 					except Exception as e:
 						with open("rebootLog", "a") as myfile:
-							myfile.write("\n\ncase: sending an ACK_Status state\n         " + repr(e))
+							myfile.write("\n\ncase: sending an ACK_Status state\n         " + repr(e) + str(datetime.now()))
 							
 						os.system("sudo shutdown -r now")   #will restart modem or restart RPI because a transmission error'd out?  connection must be down?
 						
@@ -118,11 +122,14 @@ while 1:
 						startMsgToConsume = True
 						print 'CarStart message received' 
 						
+				elif data == 'Debug <EOF>':
+					break
+					
 				data = ''
 						
 		
-			#modem has been on for more than 10 seconds AND the car is off with no sign of a StartCar  ...just cycle the modem
-			else
+			#modem has been on for more than 10 seconds AND the car is off with no sign of a StartCar.  OR the car has been on for 10 minutes. Refresh the connection  ...just cycle the modem
+			else:
 				print 'Shutting off socket and killing WVDIAL'
 				s.shutdown(socket.SHUT_RDWR)
 				s.close()
@@ -151,7 +158,7 @@ while 1:
 			modemTimer = time.time()
 			modemState = 4
 			
-		elif modemState == 4 and time.time() - modemTimer > 9.9:      #wvdial should be running by now - put process in operating mode 0
+		elif modemState == 4 and time.time() - modemTimer > 15:      #wvdial should be running by now - put process in operating mode 0
 			modemTimer = time.time()
 			print 'Waited 10s for wvdial, now entering main message loop'
 			modemState = 0	
@@ -160,7 +167,7 @@ while 1:
 				s.connect((HOST, PORT))
 			except Exception as e:
 				with open("rebootLog", "a") as myfile:
-					myfile.write("\n\ncase: Tried to socket connect after wvidial... failed...#$^@\n         " + repr(e))
+					myfile.write("\n\ncase: Tried to socket connect after wvidial... failed...#$^@\n         " + repr(e) + str(datetime.now()))
 				os.system("sudo shutdown -r now")
 				
 			s.setblocking(0)   #make non blocking after a connection is actually made	
@@ -168,7 +175,7 @@ while 1:
 				s.sendall('<EOF>')   #makes me a real client at dah soyvah
 			except Exception as e:
 				with open("rebootLog", "a") as myfile:
-					myfile.write("\n\ncase: Tried to send first <EOF> to make me a real client\n         " + repr(e))
+					myfile.write("\n\ncase: Tried to send first <EOF> to make me a real client\n         " + repr(e) + str(datetime.now()))
 					
 				os.system("sudo shutdown -r now")
 		
@@ -176,8 +183,11 @@ while 1:
 		time.sleep(0.0005)
 	except Exception as derp:
 		with open("rebootLog", "a") as myfile:
-			myfile.write("\n\ncase: general outer loop...lame\n         " + repr(derp))
+			myfile.write("\n\ncase: general outer loop...lame\n         " + repr(derp) + str(datetime.now()))
 		
 		os.system("sudo shutdown -r now")
 		
 	
+while 1:
+	debug = 1   #debug was called...I'm just spinning
+	time.sleep(0.5)

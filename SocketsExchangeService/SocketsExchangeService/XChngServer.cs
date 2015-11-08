@@ -122,6 +122,11 @@ namespace SocketsExchangeService
                     //LatestRPI.CarState = "ON";
                     //LatestRPI.SendToClients();
                 }
+                else if(msg.Contains("Debug <EOF>"))
+                {
+                    ClientMsgCache.AddMessage(msg, ClientType.RPIProducerClient);
+                    parentForm.txtTraffic.Text = ">> " + String.Format("{0:G}", DateTime.Now) + " - " + " (RemCon -> Rpi) " + msg + Environment.NewLine + parentForm.txtTraffic.Text;
+                }
                 else
                 {
                     return;

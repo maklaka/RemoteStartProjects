@@ -96,6 +96,15 @@ namespace RemoteStartWebApp
             }
             SessionManager.MyCache(Session.SessionID).AddMessageToServer("ACK_Status <EOF>");
             timUpdateMe.Enabled = true;
-        } 
+        }
+
+        protected void btnHalt_Click(object sender, EventArgs e)
+        {
+            SessionManager.MyCache(Session.SessionID).AddMessageToServer("Debug <EOF>");
+        }
+
+
+
+
     }
 }

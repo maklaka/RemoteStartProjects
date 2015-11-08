@@ -42,6 +42,7 @@
             </asp:TableRow>
         </asp:Table>
         <br />
+        <asp:Button ID="btnHalt" runat="server" OnClick="btnHalt_Click" Text="Debug Halt" />
         <br />
     </ContentTemplate>
 </asp:UpdatePanel>
